@@ -63,13 +63,13 @@ export default function History() {
           <table className="table">
             <thead>
               <tr>
-                <th scope="col">Member</th>
+                <th scope="col" className="rowhead">Member</th>
                 <th scope="col" className="num">Titles</th>
                 <th scope="col" className="num">Finals</th>
-                <th scope="col" className="num hide-sm">Playoffs</th>
+                <th scope="col" className="num">Playoffs</th>
                 <th scope="col" className="num">Record</th>
                 <th scope="col" className="num">Win %</th>
-                <th scope="col" className="num hide-sm">PF per season</th>
+                <th scope="col" className="num">PF per season</th>
               </tr>
             </thead>
             <tbody>
@@ -78,10 +78,10 @@ export default function History() {
                   <th scope="row">{r.name}{r.years.length ? <span className="muted small"> {r.years.join(", ")}</span> : null}</th>
                   <td className="num">{r.titles}</td>
                   <td className="num">{r.finals}</td>
-                  <td className="num hide-sm">{r.playoffs}</td>
+                  <td className="num">{r.playoffs}</td>
                   <td className="num">{r.w}-{r.l}{r.t ? `-${r.t}` : ""}</td>
                   <td className="num">{((r.w + 0.5 * r.t) / Math.max(1, r.w + r.l + r.t) * 100).toFixed(1)}%</td>
-                  <td className="num hide-sm">{fmtPts(r.pf / r.seasons)}</td>
+                  <td className="num">{fmtPts(r.pf / r.seasons)}</td>
                 </tr>
               ))}
             </tbody>

@@ -27,14 +27,14 @@ export default function Power() {
             <thead>
               <tr>
                 <th scope="col" className="num">#</th>
-                <th scope="col">Team</th>
+                <th scope="col" className="rowhead">Team</th>
                 <th scope="col" className="num">Score</th>
                 <th scope="col" className="num">Record</th>
                 <th scope="col" className="num">All-play</th>
                 <th scope="col" className="num">Luck</th>
-                <th scope="col" className="num hide-sm">Efficiency</th>
-                <th scope="col" className="num hide-sm">Last 3 avg</th>
-                <th scope="col" className="num hide-sm">PPG</th>
+                <th scope="col" className="num">Efficiency</th>
+                <th scope="col" className="num">Last 3 avg</th>
+                <th scope="col" className="num">PPG</th>
               </tr>
             </thead>
             <tbody>
@@ -46,9 +46,9 @@ export default function Power() {
                   <td className="num">{recordText(r)}</td>
                   <td className="num">{r.allPlay.w}-{r.allPlay.l}{r.allPlay.t ? `-${r.allPlay.t}` : ""}</td>
                   <td className={`num ${r.luck >= 0 ? "pos" : "neg"}`}>{signed(r.luck)}</td>
-                  <td className="num hide-sm">{pct(r.efficiency)}</td>
-                  <td className="num hide-sm">{fmtPts(r.recentAvg)}</td>
-                  <td className="num hide-sm">{fmtPts(r.ppg)}</td>
+                  <td className="num">{pct(r.efficiency)}</td>
+                  <td className="num">{fmtPts(r.recentAvg)}</td>
+                  <td className="num">{fmtPts(r.ppg)}</td>
                 </tr>
               ))}
             </tbody>

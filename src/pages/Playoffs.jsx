@@ -27,13 +27,13 @@ export default function Playoffs() {
             <thead>
               <tr>
                 <th scope="col" className="num">Seed</th>
-                <th scope="col">Team</th>
+                <th scope="col" className="rowhead">Team</th>
                 <th scope="col" className="num">Div</th>
                 <th scope="col" className="num">Record</th>
                 <th scope="col" className="num">PF</th>
-                <th scope="col" className="num hide-sm">Max PF</th>
+                <th scope="col" className="num">Max PF</th>
                 <th scope="col" className="num">Games back</th>
-                <th scope="col" className="num hide-sm">PF back</th>
+                <th scope="col" className="num">PF back</th>
                 <th scope="col" className="num">Wild card</th>
               </tr>
             </thead>
@@ -45,9 +45,9 @@ export default function Playoffs() {
                   <td className="num">{r.division}</td>
                   <td className="num">{recordText(r)}</td>
                   <td className="num">{fmtPts(r.pf)}</td>
-                  <td className="num hide-sm">{fmtPts(r.maxPf)}</td>
+                  <td className="num">{fmtPts(r.maxPf)}</td>
                   <td className="num">{r.divWinner ? "—" : gb(r.gamesBehind)}</td>
-                  <td className="num hide-sm">{r.divWinner ? "—" : fmtPts(r.pointsBehind)}</td>
+                  <td className="num">{r.divWinner ? "—" : fmtPts(r.pointsBehind)}</td>
                   <td className={`num ${r.wcGap == null ? "" : r.wcGap >= 0 ? "pos" : "neg"}`}>{r.divWinner ? "—" : signed(r.wcGap)}</td>
                 </tr>
               ))}

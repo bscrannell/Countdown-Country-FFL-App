@@ -433,7 +433,6 @@ button, input, select { font: inherit; color: inherit; }
 .table td.strong { font-weight: 700; }
 .table tr.h2h-playoff td:nth-child(2) { font-weight: 600; }
 @media (max-width: 720px) {
-  .board tbody th[scope="row"], .board thead th:nth-child(2) { position: sticky; left: 0; z-index: 1; background: var(--card); box-shadow: 1px 0 0 var(--line-2); }
   .board td:first-child, .board th:first-child { padding-right: 4px; }
   .table td.this-pick { min-width: 150px; }
 }
@@ -441,3 +440,12 @@ button, input, select { font: inherit; color: inherit; }
 /* payout on the slip */
 .stub-pay { padding-bottom: 14px; margin-bottom: 8px; border-bottom: 1px dashed var(--line); }
 .stub-amount { font: 900 2.6rem/1 var(--display); letter-spacing: -0.01em; margin: 4px 0 2px; overflow-wrap: anywhere; }
+
+/* phones: tables scroll sideways with the name column pinned */
+.table-wrap { overscroll-behavior-x: contain; touch-action: pan-x pan-y; }
+@media (max-width: 720px) {
+  .table:not(.grid) tbody th[scope="row"], .table:not(.grid) thead th.rowhead {
+    position: sticky; left: 0; z-index: 1; background: var(--card); box-shadow: 1px 0 0 var(--line); max-width: 150px;
+  }
+  .table:not(.grid) tbody th[scope="row"] .who-team { max-width: 96px; }
+}

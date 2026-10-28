@@ -56,7 +56,7 @@ export default function Draft() {
           <table className="table ledger">
             <thead>
               <tr>
-                <th scope="col">Team</th>
+                <th scope="col" className="rowhead">Team</th>
                 {ledger.seasons.map((s) => <th scope="col" key={s}>{s}</th>)}
               </tr>
             </thead>

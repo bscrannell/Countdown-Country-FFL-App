@@ -36,16 +36,16 @@ export default function Bets() {
             <thead>
               <tr>
                 <th scope="col" className="num">#</th>
-                <th scope="col">Member</th>
+                <th scope="col" className="rowhead">Member</th>
                 <th scope="col" className="num">Units</th>
                 <th scope="col" className="num">Won</th>
                 <th scope="col" className="hide-sm" aria-label="Units chart"></th>
                 <th scope="col" className="num">W-L-P</th>
                 {fw ? <th scope="col">Week {fw} pick</th> : null}
-                <th scope="col" className="num hide-sm">Hit rate</th>
-                <th scope="col" className="hide-sm">Best hit</th>
-                <th scope="col" className="num hide-sm">Streak</th>
-                <th scope="col" className="hide-xs">By week</th>
+                <th scope="col" className="num">Hit rate</th>
+                <th scope="col">Best hit</th>
+                <th scope="col" className="num">Streak</th>
+                <th scope="col">By week</th>
               </tr>
             </thead>
             <tbody>
@@ -58,10 +58,10 @@ export default function Bets() {
                   <td className="hide-sm bar-cell"><UnitsBar value={r.units} max={maxAbs} /></td>
                   <td className="num">{r.w}-{r.l}-{r.p}</td>
                   {fw ? <td className="this-pick"><CurrentPick leg={r.byWeek[fw]} /></td> : null}
-                  <td className="num hide-sm">{r.winPct == null ? "—" : `${Math.round(r.winPct * 100)}%`}</td>
-                  <td className="hide-sm small">{r.best ? `${r.best.pick} (${fmtOdds(r.best.odds)})` : "—"}</td>
-                  <td className="num hide-sm">{r.streak ? `${r.streak.result === "win" ? "W" : "L"}${r.streak.n}` : "—"}</td>
-                  <td className="hide-xs"><Spark series={r.series} /></td>
+                  <td className="num">{r.winPct == null ? "—" : `${Math.round(r.winPct * 100)}%`}</td>
+                  <td className="small">{r.best ? `${r.best.pick} (${fmtOdds(r.best.odds)})` : "—"}</td>
+                  <td className="num">{r.streak ? `${r.streak.result === "win" ? "W" : "L"}${r.streak.n}` : "—"}</td>
+                  <td><Spark series={r.series} /></td>
                 </tr>
               ))}
             </tbody>
