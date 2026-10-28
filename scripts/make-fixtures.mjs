@@ -29,7 +29,9 @@ const H = [
 ];
 const hu = users.map(([id, dn]) => ({ user_id: id, display_name: dn, metadata: {} })).concat([{ user_id: "595126728565768192", display_name: "Pettey15", metadata: {} }]);
 for (const [id, season, prev, pws, pt, rosters, bracket] of H) {
-  put(`league/${id}`, { league_id: id, name: "Countdown County FFL", season, status: "complete", previous_league_id: prev, total_rosters: rosters.length, settings: { playoff_week_start: pws, playoff_teams: pt, divisions: rosters[0][6] ? 4 : 0 } });
+  put(`league/${id}`, { league_id: id, name: "Countdown County FFL", season, status: "complete", previous_league_id: prev, total_rosters: rosters.length, settings: { playoff_week_start: pws, playoff_teams: pt, divisions: rosters[0][6] ? 4 : 0, last_scored_leg: 17 } });
+  const hm = JSON.parse(fs.readFileSync(new URL("./data/history-matchups.json", import.meta.url), "utf8"))[id];
+  for (const [w, list] of Object.entries(hm.w)) put(`league/${id}/matchups/${w}`, list.map(([r, m, p]) => ({ roster_id: r, matchup_id: m || null, points: p })));
   put(`league/${id}/rosters`, rosters.map(([rid, owner, w, l, t, pf, div]) => { const [f, fd] = split(pf); return { roster_id: rid, owner_id: owner, settings: { wins: w, losses: l, ties: t, fpts: f, fpts_decimal: fd, division: div } }; }));
   put(`league/${id}/users`, hu);
   put(`league/${id}/winners_bracket`, bracket);

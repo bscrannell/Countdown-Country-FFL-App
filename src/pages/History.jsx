@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useApp } from "../app.jsx";
 import { Section, fmtPts } from "../ui.jsx";
 import { getJSON } from "../client.js";
+import { seasonGames, unpackGame, headToHead } from "../../lib/h2h.js";
 
 export default function History() {
   const { L } = useApp();
@@ -35,6 +36,8 @@ export default function History() {
     <div className="page">
       <h1 className="page-title">League history</h1>
       <p className="lede">{data.seasons.length} completed seasons on Sleeper. The {L.season} season counts once it's finished.</p>
+
+      <HeadToHead data={data} />
 
       <Section title="Champions">
         <ol className="champs">
@@ -87,5 +90,101 @@ export default function History() {
         <p className="footnote">Regular-season records only. Playoffs counts seasons that ended with a top-6 finish in the winners bracket.</p>
       </Section>
     </div>
+  );
+}
+
+const rec = (r) => `${r.w}-${r.l}${r.t ? `-${r.t}` : ""}`;
+
+function HeadToHead({ data }) {
+  const { L, members, byUser } = useApp();
+  const [a, setA] = useState(members[0].userId);
+  const [b, setB] = useState(members[1].userId);
+
+  const games = useMemo(() => {
+    const past = data.seasons.flatMap((s) => (s.games || []).map(unpackGame));
+    const current = seasonGames({
+      season: L.season,
+      weeks: L.weeks,
+      rosterToUser: Object.fromEntries(L.members.map((m) => [m.rosterId, m.userId])),
+      playoffWeekStart: L.playoffWeekStart,
+      bracket: L.winnersBracket,
+      lastWeek: L.lastScoredWeek,
+    });
+    return past.concat(current);
+  }, [data, L]);
+
+  const h = useMemo(() => (a && b && a !== b ? headToHead(games, a, b) : null), [games, a, b]);
+  const A = byUser[a], B = byUser[b];
+
+  return (
+    <Section title="Head to head" intro="Every game two members have played against each other since 2020, this season included. Playoffs count winners-bracket games only.">
+      <div className="h2h-pick">
+        <label className="field">
+          <span>Team</span>
+          <select value={a} onChange={(e) => setA(e.target.value)}>
+            {members.map((m) => <option key={m.userId} value={m.userId}>{m.name}</option>)}
+          </select>
+        </label>
+        <button type="button" className="btn btn-quiet h2h-swap" onClick={() => { setA(b); setB(a); }} aria-label="Swap teams">Swap</button>
+        <label className="field">
+          <span>Opponent</span>
+          <select value={b} onChange={(e) => setB(e.target.value)}>
+            {members.map((m) => <option key={m.userId} value={m.userId}>{m.name}</option>)}
+          </select>
+        </label>
+      </div>
+
+      {a === b ? (
+        <p className="muted">Pick two different members.</p>
+      ) : !h.games.length ? (
+        <p className="muted">{A.name} and {B.name} haven't played each other yet.</p>
+      ) : (
+        <>
+          <div className="h2h-score" aria-live="polite">
+            <div className={h.total.w > h.total.l ? "h2h-side lead" : "h2h-side"}>
+              <span className="h2h-name">{A.name}</span>
+              <span className="h2h-wins">{h.total.w}</span>
+            </div>
+            <div className="h2h-mid">{h.total.t ? `${h.total.t} tied` : "–"}</div>
+            <div className={h.total.l > h.total.w ? "h2h-side lead right" : "h2h-side right"}>
+              <span className="h2h-wins">{h.total.l}</span>
+              <span className="h2h-name">{B.name}</span>
+            </div>
+          </div>
+          <dl className="h2h-facts">
+            <div><dt>Regular season</dt><dd>{rec(h.regular)}</dd></div>
+            <div><dt>Playoffs</dt><dd>{h.playoffs.w + h.playoffs.l + h.playoffs.t ? rec(h.playoffs) : "Never met"}</dd></div>
+            <div><dt>Points</dt><dd>{fmtPts(h.pointsA)} to {fmtPts(h.pointsB)}</dd></div>
+            <div><dt>Streak</dt><dd>{h.streak ? `${byUser[h.streak.who].name} has won ${h.streak.n}` : "Last game tied"}</dd></div>
+            {h.biggestA ? <div><dt>{A.name}'s biggest win</dt><dd>by {fmtPts(h.biggestA.margin)}, {h.biggestA.season} {h.biggestA.label.toLowerCase()}</dd></div> : null}
+            {h.biggestB ? <div><dt>{B.name}'s biggest win</dt><dd>by {fmtPts(h.biggestB.margin)}, {h.biggestB.season} {h.biggestB.label.toLowerCase()}</dd></div> : null}
+          </dl>
+          <div className="table-wrap">
+            <table className="table">
+              <thead>
+                <tr>
+                  <th scope="col">Season</th>
+                  <th scope="col">Game</th>
+                  <th scope="col" className="num">{A.name}</th>
+                  <th scope="col" className="num">{B.name}</th>
+                  <th scope="col">Winner</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...h.games].reverse().map((g) => (
+                  <tr key={`${g.season}-${g.week}-${g.label}`} className={g.playoff ? "h2h-playoff" : ""}>
+                    <td>{g.season}</td>
+                    <td>{g.label}</td>
+                    <td className={`num${g.winner === a ? " strong" : ""}`}>{fmtPts(g.ptsA)}</td>
+                    <td className={`num${g.winner === b ? " strong" : ""}`}>{fmtPts(g.ptsB)}</td>
+                    <td>{g.winner ? byUser[g.winner].name : "Tie"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
+    </Section>
   );
 }

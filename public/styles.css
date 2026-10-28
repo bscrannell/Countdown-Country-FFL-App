@@ -406,3 +406,34 @@ button, input, select { font: inherit; color: inherit; }
 .table.grid { width: max-content; min-width: 100%; }
 .grid td.cell, .grid thead th.num { min-width: 58px; }
 .grid thead th.num { text-align: center; }
+
+/* current pick + money columns */
+.table td.money { font-weight: 600; }
+.table td.money.muted { color: var(--ink-3); }
+.table td.this-pick { white-space: normal; min-width: 170px; max-width: 240px; }
+.cp { display: flex; align-items: flex-start; gap: 8px; }
+.cp .chip { flex: none; }
+.cp-text { display: grid; line-height: 1.25; }
+.cp-pick { font-weight: 500; }
+.cp-odds { font-size: 0.8rem; color: var(--ink-3); }
+
+/* head to head */
+.h2h-pick { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 10px; max-width: 560px; }
+.h2h-swap { min-height: 44px; padding: 0 12px; }
+.h2h-score { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; margin: 18px 0 8px; padding: 14px 16px; background: var(--card); border: 2px solid var(--ink); border-radius: 12px; }
+.h2h-side { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.h2h-side.right { justify-content: flex-end; }
+.h2h-name { font: 700 1.3rem/1.1 var(--display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.h2h-wins { font: 900 3.2rem/0.9 var(--display); color: var(--ink-3); }
+.h2h-side.lead .h2h-wins { color: var(--ink); text-decoration: underline; text-decoration-color: var(--flag); text-decoration-thickness: 5px; text-underline-offset: 6px; }
+.h2h-mid { color: var(--ink-3); font-size: 0.85rem; text-align: center; }
+.h2h-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 24px; margin: 12px 0 16px; }
+.h2h-facts dt { font-size: 0.82rem; font-weight: 600; color: var(--ink-2); }
+.h2h-facts dd { margin: 2px 0 0; }
+.table td.strong { font-weight: 700; }
+.table tr.h2h-playoff td:nth-child(2) { font-weight: 600; }
+@media (max-width: 720px) {
+  .board tbody th[scope="row"], .board thead th:nth-child(2) { position: sticky; left: 0; z-index: 1; background: var(--card); box-shadow: 1px 0 0 var(--line-2); }
+  .board td:first-child, .board th:first-child { padding-right: 4px; }
+  .table td.this-pick { min-width: 150px; }
+}

@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 import { useApp } from "../app.jsx";
 import { Link, Section, Units, UnitsBar, Spark, ResultChip, Empty } from "../ui.jsx";
-import { leaderboard, legsForWeek, weekTally, tallyText, parlaySummary, parlayLedger } from "../../lib/bets.js";
+import { leaderboard, legsForWeek, weekTally, tallyText, parlaySummary, parlayLedger, featuredWeek } from "../../lib/bets.js";
 import { autoBettor } from "../../lib/league.js";
-import { fmtOdds, fmtUnits, fmtMoney, legUnits } from "../../lib/odds.js";
+import { fmtOdds, fmtUnits, fmtMoney, fmtSignedMoney, legUnits } from "../../lib/odds.js";
+import { BETS } from "../../lib/config.js";
 
 export default function Bets() {
   const { L, bets, betsErr, members, betWeeks, byUser, openWeek, auth } = useApp();
@@ -12,6 +13,7 @@ export default function Bets() {
   const maxAbs = Math.max(1, ...board.map((r) => Math.abs(r.units)));
   const summaries = betWeeks.map((w) => ({ week: w, ...parlaySummary(legsForWeek(legs, w), bets && bets.parlays[w], autoBettor(L, w)) }));
   const ledger = parlayLedger(summaries);
+  const fw = featuredWeek(legs, openWeek);
 
   if (betsErr) return <div className="page"><div className="notice notice-bad">{betsErr}</div></div>;
   if (!bets) return <div className="page loading">Loading bets…</div>;
@@ -36,8 +38,10 @@ export default function Bets() {
                 <th scope="col" className="num">#</th>
                 <th scope="col">Member</th>
                 <th scope="col" className="num">Units</th>
+                <th scope="col" className="num">Won</th>
                 <th scope="col" className="hide-sm" aria-label="Units chart"></th>
                 <th scope="col" className="num">W-L-P</th>
+                {fw ? <th scope="col">Week {fw} pick</th> : null}
                 <th scope="col" className="num hide-sm">Hit rate</th>
                 <th scope="col" className="hide-sm">Best hit</th>
                 <th scope="col" className="num hide-sm">Streak</th>
@@ -50,8 +54,10 @@ export default function Bets() {
                   <td className="num">{r.rank}</td>
                   <th scope="row">{r.name}</th>
                   <td className="num"><Units value={r.units} /></td>
+                  <td className={`num money ${r.money > 0.004 ? "pos" : r.money < -0.004 ? "neg" : "muted"}`}>{fmtSignedMoney(r.money)}</td>
                   <td className="hide-sm bar-cell"><UnitsBar value={r.units} max={maxAbs} /></td>
                   <td className="num">{r.w}-{r.l}-{r.p}</td>
+                  {fw ? <td className="this-pick"><CurrentPick leg={r.byWeek[fw]} /></td> : null}
                   <td className="num hide-sm">{r.winPct == null ? "—" : `${Math.round(r.winPct * 100)}%`}</td>
                   <td className="hide-sm small">{r.best ? `${r.best.pick} (${fmtOdds(r.best.odds)})` : "—"}</td>
                   <td className="num hide-sm">{r.streak ? `${r.streak.result === "win" ? "W" : "L"}${r.streak.n}` : "—"}</td>
@@ -62,7 +68,7 @@ export default function Bets() {
           </table>
         </div>
         <p className="footnote">
-          Tiebreaker for the jersey: {bets.settings.jerseyTiebreaker || "not decided yet"}.
+          Won is units × ${BETS.unitValue.toFixed(3)}, each leg's share of the ${BETS.stake} stake. Tiebreaker for the jersey: {bets.settings.jerseyTiebreaker || "not decided yet"}.
           {tie ? " The top spot is tied right now." : ""}
         </p>
       </Section>
@@ -148,6 +154,19 @@ export default function Bets() {
         )}
       </Section>
     </div>
+  );
+}
+
+function CurrentPick({ leg }) {
+  if (!leg) return <span className="muted">No pick yet</span>;
+  return (
+    <span className="cp">
+      <ResultChip result={leg.result} />
+      <span className="cp-text">
+        <span className="cp-pick">{leg.pick}</span>
+        <span className="cp-odds">{fmtOdds(leg.odds)}</span>
+      </span>
+    </span>
   );
 }
 
