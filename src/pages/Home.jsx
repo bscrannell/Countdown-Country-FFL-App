@@ -169,6 +169,15 @@ function Slip({ week }) {
         </ul>
       </div>
       <div className="slip-stub">
+        <div className="stub-pay">
+          <div className="stub-label">{sum.status === "lost" ? "Busted" : "Potential payout"}</div>
+          <div className="stub-amount">{sum.status === "lost" ? fmtMoney(0) : sum.toWin ? fmtMoney(sum.toWin) : "—"}</div>
+          <div className="stub-when">
+            {sum.toWin
+              ? `${fmtMoney(sum.stake)} at ${fmtOdds(sum.bookOdds != null ? sum.bookOdds : sum.combinedAmerican)}${sum.bookOdds != null ? " (book price)" : ""}`
+              : "Fills in as picks come in"}
+          </div>
+        </div>
         <div className="stub-label">Picks lock</div>
         <Countdown to={dl} />
         <div className="stub-when">{fmtDeadline(dl)}</div>

@@ -437,3 +437,7 @@ button, input, select { font: inherit; color: inherit; }
   .board td:first-child, .board th:first-child { padding-right: 4px; }
   .table td.this-pick { min-width: 150px; }
 }
+
+/* payout on the slip */
+.stub-pay { padding-bottom: 14px; margin-bottom: 8px; border-bottom: 1px dashed var(--line); }
+.stub-amount { font: 900 2.6rem/1 var(--display); letter-spacing: -0.01em; margin: 4px 0 2px; overflow-wrap: anywhere; }
