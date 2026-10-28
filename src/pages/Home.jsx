@@ -125,7 +125,7 @@ function GameRecap({ label, g, byRoster }) {
 }
 
 function Slip({ week }) {
-  const { L, bets, byUser, members, deadline } = useApp();
+  const { L, bets, byUser, members, deadline, auth } = useApp();
   const legs = bets ? legsForWeek(bets.legs, week) : [];
   const rec = bets && bets.parlays[week];
   const auto = autoBettor(L, week);
@@ -150,11 +150,11 @@ function Slip({ week }) {
         )}
         <p className="slip-sub">
           {auto && bettor && !sum.bettorOverridden
-            ? `Lowest score in week ${auto.fromWeek} with ${fmtPts(auto.points)}. ${fmtMoney(sum.stake)} on a ${BETS.legsPerParlay}-leg parlay, one leg from everybody.`
-            : `${fmtMoney(sum.stake)} on a ${BETS.legsPerParlay}-leg parlay, one leg from everybody.`}
+            ? `Lowest score in week ${auto.fromWeek} with ${fmtPts(auto.points)}. ${fmtMoney(sum.stake)} on a ${BETS.legsPerParlay}-leg parlay, one leg from everybody. Send your leg to the commissioner.`
+            : `${fmtMoney(sum.stake)} on a ${BETS.legsPerParlay}-leg parlay, one leg from everybody. Send your leg to the commissioner.`}
         </p>
         <div className="slip-actions">
-          <Link to={`/bets/week/${week}`} className="btn btn-primary">Add your pick</Link>
+          <Link to={`/bets/week/${week}`} className="btn btn-primary">{auth.admin ? "Enter picks" : "See the picks"}</Link>
           <span className="slip-count">
             {legs.length} of {members.length} picks in
             {sum.combinedAmerican ? `, ${fmtOdds(sum.combinedAmerican)} so far` : ""}

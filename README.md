@@ -10,14 +10,12 @@ Standings, scores, brackets and traded picks come live from Sleeper (league `131
 2. **Import it into Vercel.** In Vercel choose *Add New → Project*, pick the repository and click *Deploy*. The settings come from `vercel.json`, so leave everything as it is.
 3. **Add storage.** In the project open *Storage → Create Database → Upstash (Redis)*. Pick the free plan and connect it to the project. Vercel adds `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you.
    - Choose **Upstash** specifically. The app talks to it over Upstash's REST API.
-4. **Add the two codes.** In *Settings → Environment Variables* add:
-   - `LEAGUE_CODE`: the code members type once to submit picks (share it in the group chat)
-   - `ADMIN_PIN`: your commissioner PIN for grading picks and editing parlays (keep it to yourself)
-5. **Redeploy** (*Deployments → ⋯ → Redeploy*) so the new variables take effect, then send the link to the league.
+4. **Add your PIN.** In *Settings → Environment Variables* add `ADMIN_PIN`, the commissioner PIN for entering and grading picks. Keep it to yourself. Everyone else can view the app but can't change anything.
+5. **Redeploy** (*Deployments → ⋯ → Redeploy*) so the new variable takes effect, then send the link to the league.
 
 ## Weekly routine
 
-- **By Thursday morning:** everyone opens the app, taps *Add your pick*, chooses their name, and enters the leg and the American odds. Picks lock Thursday at 8:00 AM Eastern.
+- **By Thursday morning:** members send their leg and odds to the commissioner, who enters them on the week's page (sign in once at */admin*, or *More → Commissioner* on a phone). The countdown shows the Thursday 8:00 AM Eastern deadline; the commissioner can still enter picks after it.
 - **Bettor:** the app reads last week's low scorer from Sleeper. Override it on the week's page if someone else places it.
 - **Place the bet,** then on the week's page (signed in as commissioner) enter the book's odds, tick *Bet has been placed* and add a note if you like.
 - **Grade legs** as games finish (Win / Loss / Push). Units and the jersey race update right away. If the parlay hits, the payout is calculated from the odds. Enter the actual payout if the book paid something different.
@@ -40,7 +38,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:3000. Locally, bets are saved to `.data/store.json`, the league code is `countdown` and the admin PIN is `1234`. `npm run dev:fixtures` uses saved Sleeper data instead of the live API, and `npm test` checks the math against the spreadsheet.
+Open http://localhost:3000. Locally, bets are saved to `.data/store.json` and the admin PIN is `1234`. `npm run dev:fixtures` uses saved Sleeper data instead of the live API, and `npm test` checks the math against the spreadsheet.
 
 ## How it's built
 

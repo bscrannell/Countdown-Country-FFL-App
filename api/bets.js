@@ -1,9 +1,8 @@
 import { BETS, NICKNAMES } from "../lib/config.js";
 import { parseOdds } from "../lib/odds.js";
-import { isLocked } from "../lib/deadline.js";
 import { leagueBasics } from "../lib/sleeper.js";
 import * as store from "../lib/store.js";
-import { isAdmin, isMember, body, fail } from "../lib/http.js";
+import { isAdmin, body, fail } from "../lib/http.js";
 
 const RESULTS = new Set(["pending", "win", "loss", "push"]);
 const SPORTS = new Set(["NFL", "NCAAF", "NBA", "NCAAB", "MLB", "NHL", "UFC", "Soccer", "Golf", "Other"]);
@@ -24,7 +23,6 @@ export default async function handler(req, res) {
     const basics = await leagueBasics();
     const season = basics.season;
     const admin = isAdmin(req);
-    const member = isMember(req);
     const week = Number(b.week);
 
     const checkWeek = () => Number.isInteger(week) && week >= BETS.firstWeek && week <= BETS.lastWeek;
@@ -32,7 +30,7 @@ export default async function handler(req, res) {
 
     switch (b.action) {
       case "submitLeg": {
-        if (!member) return fail(res, 401, "Enter the league code to submit a pick.");
+        if (!admin) return fail(res, 401, "Only the commissioner can enter picks.");
         if (!checkWeek()) return fail(res, 400, `Week must be ${BETS.firstWeek}–${BETS.lastWeek}.`);
         if (!knownUser(b.userId)) return fail(res, 400, "Pick who you are from the list.");
         const pick = String(b.pick || "").trim().replace(/\s+/g, " ");
@@ -40,10 +38,6 @@ export default async function handler(req, res) {
         const odds = parseOdds(b.odds);
         if (odds == null) return fail(res, 400, "Enter American odds like -110 or +250.");
         const existing = await store.getLeg(season, week, b.userId);
-        if (!admin) {
-          if (isLocked(basics.seasonStart, week)) return fail(res, 403, `Week ${week} picks are locked. Ask the commissioner to add it.`);
-          if (existing && existing.result !== "pending") return fail(res, 403, "This pick has already been graded.");
-        }
         const sport = SPORTS.has(b.sport) ? b.sport : null;
         const leg = {
           season,
@@ -52,20 +46,18 @@ export default async function handler(req, res) {
           pick,
           odds,
           sport,
-          result: admin && RESULTS.has(b.result) ? b.result : existing ? existing.result : "pending",
+          result: RESULTS.has(b.result) ? b.result : existing ? existing.result : "pending",
           createdAt: (existing && existing.createdAt) || new Date().toISOString(),
           updatedAt: new Date().toISOString(),
-          source: admin ? "admin" : "member",
+          source: "admin",
         };
         await store.putLeg(season, leg);
         return res.status(200).json({ ok: true, leg });
       }
       case "removeLeg": {
-        if (!member) return fail(res, 401, "Enter the league code first.");
+        if (!admin) return fail(res, 401, "Only the commissioner can remove picks.");
         const existing = await store.getLeg(season, week, b.userId);
         if (!existing) return fail(res, 404, "No pick to remove.");
-        if (!admin && (isLocked(basics.seasonStart, week) || existing.result !== "pending"))
-          return fail(res, 403, "Locked picks can only be removed by the commissioner.");
         await store.deleteLeg(season, week, b.userId);
         return res.status(200).json({ ok: true });
       }

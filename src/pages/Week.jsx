@@ -31,7 +31,6 @@ export default function Week({ week }) {
   const locked = dl ? now >= dl : false;
   const byUserLeg = Object.fromEntries(legs.map((l) => [l.userId, l]));
   const missing = members.filter((m) => !byUserLeg[m.userId]);
-  const canEdit = auth.admin || !locked;
 
   const act = async (payload, okText) => {
     setMsg(null);
@@ -92,7 +91,6 @@ export default function Week({ week }) {
             .sort((a, b) => byUser[a.userId]?.name.localeCompare(byUser[b.userId]?.name))
             .map((l) => {
               const m = byUser[l.userId];
-              const mine = prefs.me() === l.userId;
               return (
                 <li key={l.userId} className={`leg leg-${l.result}`}>
                   <ResultChip result={l.result} />
@@ -120,7 +118,7 @@ export default function Week({ week }) {
                         ))}
                       </div>
                     ) : null}
-                    {(auth.admin || (mine && !locked && l.result === "pending")) ? (
+                    {auth.admin ? (
                       <button className="link-btn" onClick={() => setEditing(l.userId)}>Edit</button>
                     ) : null}
                   </div>
@@ -136,7 +134,7 @@ export default function Week({ week }) {
         ) : null}
       </Section>
 
-      {canEdit ? (
+      {auth.admin ? (
         <PickForm
           week={week}
           key={`${week}-${editing || "new"}`}
@@ -147,7 +145,11 @@ export default function Week({ week }) {
           act={act}
         />
       ) : (
-        <p className="notice">Week {week} picks locked {fmtDeadline(dl)}. Missed it? The commissioner can still add a pick.</p>
+        <p className="notice">
+          {locked
+            ? `Week ${week} picks locked ${fmtDeadline(dl)}.`
+            : `The commissioner enters everyone's picks. Send yours before ${fmtDeadline(dl)}.`}
+        </p>
       )}
 
       {auth.admin ? <ParlayEditor week={week} rec={rec || {}} auto={auto} act={act} /> : null}
@@ -156,13 +158,12 @@ export default function Week({ week }) {
 }
 
 function PickForm({ week, initialUser, legs, locked, onSaved, act }) {
-  const { members, auth, refreshAuth } = useApp();
-  const [userId, setUserId] = useState(initialUser || prefs.me() || "");
+  const { members } = useApp();
+  const [userId, setUserId] = useState(initialUser || "");
   const existing = legs[userId];
   const [pick, setPick] = useState(existing ? existing.pick : "");
   const [odds, setOdds] = useState(existing ? fmtOdds(existing.odds).replace("—", "") : "");
   const [sport, setSport] = useState(existing && existing.sport ? existing.sport : "");
-  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -173,19 +174,17 @@ function PickForm({ week, initialUser, legs, locked, onSaved, act }) {
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const parsed = parseOdds(odds);
-  const needCode = !auth.member;
 
   const submit = async (e) => {
     e.preventDefault();
     setBusy(true);
-    if (needCode) {
-      prefs.setCode(code.trim());
-      await refreshAuth();
+    const ok = await act({ action: "submitLeg", week, userId, pick, odds, sport }, existing ? "Pick updated." : "Pick saved.");
+    if (ok && !existing) {
+      const next = members.find((m) => m.userId !== userId && !legs[m.userId]);
+      setUserId(next ? next.userId : "");
     }
-    prefs.setMe(userId);
-    const ok = await act({ action: "submitLeg", week, userId, pick, odds, sport }, existing ? "Pick updated." : "Pick saved. Good luck.");
     setBusy(false);
-    if (ok) onSaved();
+    if (ok && existing) onSaved();
   };
 
   const remove = async () => {
@@ -196,19 +195,19 @@ function PickForm({ week, initialUser, legs, locked, onSaved, act }) {
   };
 
   return (
-    <Section title={existing ? "Change your pick" : "Add your pick"} intro={locked ? "Picks are locked. You're adding this as the commissioner." : null}>
+    <Section title={existing ? "Change a pick" : "Enter a pick"} intro={locked ? "Picks are locked for members, but you can still add or change them." : null}>
       <form className="form" onSubmit={submit}>
         <label className="field">
-          <span>Who are you?</span>
+          <span>Member</span>
           <select value={userId} onChange={(e) => setUserId(e.target.value)} required>
-            <option value="" disabled>Choose your name</option>
+            <option value="" disabled>Choose a member</option>
             {members.map((m) => (
               <option key={m.userId} value={m.userId}>{m.name}{legs[m.userId] ? " (picked)" : ""}</option>
             ))}
           </select>
         </label>
         <label className="field field-wide">
-          <span>Your leg</span>
+          <span>Leg</span>
           <input value={pick} onChange={(e) => setPick(e.target.value)} placeholder="Bijan anytime TD" maxLength={80} required />
         </label>
         <label className="field">
@@ -225,12 +224,6 @@ function PickForm({ week, initialUser, legs, locked, onSaved, act }) {
             {SPORTS.map((s) => <option key={s} value={s}>{s}</option>)}
           </select>
         </label>
-        {needCode ? (
-          <label className="field">
-            <span>League code</span>
-            <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Ask the commissioner" autoComplete="off" required />
-          </label>
-        ) : null}
         <div className="form-actions">
           <button className="btn btn-primary" disabled={busy || !userId || parsed == null || pick.trim().length < 2}>
             {existing ? "Update pick" : "Save pick"}

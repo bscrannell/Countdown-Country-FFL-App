@@ -8,7 +8,6 @@ import { pathToFileURL } from "node:url";
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const port = Number(process.env.PORT || 3000);
 process.env.LOCAL_STORE ??= "1";
-process.env.LEAGUE_CODE ??= "countdown";
 process.env.ADMIN_PIN ??= "1234";
 
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".png": "image/png", ".json": "application/json", ".webmanifest": "application/manifest+json" };

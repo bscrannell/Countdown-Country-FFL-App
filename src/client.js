@@ -10,18 +10,15 @@ const store = {
 };
 
 export const prefs = {
-  code: () => store.get("ccffl.code"),
   pin: () => store.get("ccffl.pin"),
   me: () => store.get("ccffl.me"),
-  setCode: (v) => store.set("ccffl.code", v),
   setPin: (v) => store.set("ccffl.pin", v),
   setMe: (v) => store.set("ccffl.me", v),
 };
 
 function headers() {
   const h = { "Content-Type": "application/json" };
-  const code = prefs.code(), pin = prefs.pin();
-  if (code) h["x-league-code"] = code;
+  const pin = prefs.pin();
   if (pin) h["x-admin-pin"] = pin;
   return h;
 }

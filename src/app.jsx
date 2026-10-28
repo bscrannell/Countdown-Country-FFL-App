@@ -58,6 +58,7 @@ const DESKTOP_EXTRA = [
   { to: "/power", label: "Power" },
   { to: "/history", label: "History" },
   { to: "/rules", label: "Rules" },
+  { to: "/admin", label: "Commissioner" },
 ];
 
 const ICONS = {
@@ -74,7 +75,7 @@ export default function App() {
   const [leagueErr, setLeagueErr] = useState(null);
   const [bets, setBets] = useState(null);
   const [betsErr, setBetsErr] = useState(null);
-  const [auth, setAuth] = useState({ member: false, admin: false });
+  const [auth, setAuth] = useState({ admin: false });
 
   useEffect(() => onRoute(() => setPath(location.pathname)), []);
 
@@ -93,8 +94,14 @@ export default function App() {
   useEffect(() => { reloadBets(); }, [reloadBets]);
 
   const refreshAuth = useCallback(async () => {
-    if (!prefs.code() && !prefs.pin()) return setAuth({ member: false, admin: false });
-    try { setAuth(await checkAuth()); } catch { /* offline: keep previous */ }
+    if (!prefs.pin()) { setAuth({ admin: false }); return false; }
+    try {
+      const a = await checkAuth();
+      setAuth(a);
+      return a.admin;
+    } catch {
+      return false;
+    }
   }, []);
   useEffect(() => { refreshAuth(); }, [refreshAuth]);
 
@@ -138,7 +145,7 @@ export default function App() {
             <Link key={n.to} to={n.to} className={path.startsWith(n.to) ? "active" : ""}>{n.label}</Link>
           ))}
         </nav>
-        {auth.admin ? <Link to="/admin" className="badge-admin">Commish</Link> : null}
+        {auth.admin ? <Link to="/admin" className="badge-admin" aria-label="Signed in as commissioner">Commish</Link> : null}
       </header>
 
       <main id="main" className="main">

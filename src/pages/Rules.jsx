@@ -15,7 +15,7 @@ export default function Rules() {
         <ul>
           <li>The lowest scorer of each week puts ${BETS.stake} on a parlay for the following week. Week 1's low scorer places the week {BETS.firstWeek} parlay, and it runs through week {BETS.lastWeek}, playoffs included.</li>
           <li>Every member picks one leg. Any sport, any bet type.</li>
-          <li>Picks are due by {d.weekday} at {time}. After that, only the commissioner can add or change a pick.</li>
+          <li>Send your leg and its odds to the commissioner by {d.weekday} at {time}. The commissioner enters every pick in the app.</li>
           <li>Each leg is one unit. A win pays the odds (+150 pays 1.50 units, −150 pays 0.67), a loss is −1, and a push or a missed week is 0.</li>
           <li>Most units after week {BETS.lastWeek} wins the jersey. Tiebreaker: {tb || "not decided yet"}.</li>
         </ul>

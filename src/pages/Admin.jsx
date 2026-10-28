@@ -8,21 +8,16 @@ import { BETS } from "../../lib/config.js";
 export default function Admin() {
   const { auth, refreshAuth, bets, reloadBets, openWeek, betWeeks } = useApp();
   const [pin, setPin] = useState("");
-  const [code, setCode] = useState(prefs.code() || "");
   const [msg, setMsg] = useState(null);
   const [tb, setTb] = useState((bets && bets.settings.jerseyTiebreaker) || "");
 
   const signIn = async (e) => {
     e.preventDefault();
     prefs.setPin(pin.trim());
-    await refreshAuth();
+    const ok = await refreshAuth();
     setPin("");
-  };
-  const saveCode = async (e) => {
-    e.preventDefault();
-    prefs.setCode(code.trim());
-    await refreshAuth();
-    setMsg({ ok: true, text: "League code saved on this device." });
+    if (!ok) setMsg({ ok: false, text: "That PIN didn't work. Check the ADMIN_PIN setting in Vercel." });
+    else setMsg(null);
   };
 
   const ungraded = bets ? betWeeks.filter((w) => w < (openWeek || BETS.lastWeek + 1)).map((w) => ({ w, n: legsForWeek(bets.legs, w).filter((l) => l.result === "pending").length })).filter((x) => x.n) : [];
@@ -32,21 +27,8 @@ export default function Admin() {
       <h1 className="page-title">Commissioner</h1>
       {msg ? <div className={msg.ok ? "notice notice-ok" : "notice notice-bad"} role="status">{msg.text}</div> : null}
 
-      <Section title="League code" intro="Members need the league code once to submit picks. It's remembered on each device.">
-        <form className="form" onSubmit={saveCode}>
-          <label className="field">
-            <span>League code</span>
-            <input value={code} onChange={(e) => setCode(e.target.value)} autoComplete="off" />
-          </label>
-          <div className="form-actions">
-            <button className="btn">Save code</button>
-            <span className="small muted">{auth.member ? "This device can submit picks." : "Not accepted yet."}</span>
-          </div>
-        </form>
-      </Section>
-
       {!auth.admin ? (
-        <Section title="Commissioner sign-in">
+        <Section title="Sign in" intro="Only the commissioner can enter picks, grade them and edit parlays. Your PIN is remembered on this device.">
           <form className="form" onSubmit={signIn}>
             <label className="field">
               <span>Admin PIN</span>
@@ -57,6 +39,15 @@ export default function Admin() {
         </Section>
       ) : (
         <>
+          {openWeek ? (
+            <Section title={`Week ${openWeek} picks`}>
+              <p>
+                {bets ? legsForWeek(bets.legs, openWeek).length : 0} of 12 entered.{" "}
+                <Link to={`/bets/week/${openWeek}`} className="btn btn-primary">Enter week {openWeek} picks</Link>
+              </p>
+            </Section>
+          ) : null}
+
           <Section title="Needs grading">
             {ungraded.length ? (
               <ul className="plain">

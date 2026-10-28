@@ -6,7 +6,7 @@ import { autoBettor } from "../../lib/league.js";
 import { fmtOdds, fmtUnits, fmtMoney, legUnits } from "../../lib/odds.js";
 
 export default function Bets() {
-  const { L, bets, betsErr, members, betWeeks, byUser, openWeek } = useApp();
+  const { L, bets, betsErr, members, betWeeks, byUser, openWeek, auth } = useApp();
   const legs = bets ? bets.legs : [];
   const board = useMemo(() => leaderboard(legs, members, betWeeks), [legs, members, betWeeks]);
   const maxAbs = Math.max(1, ...board.map((r) => Math.abs(r.units)));
@@ -25,7 +25,7 @@ export default function Bets() {
         Every week the low scorer puts {fmtMoney(2)} on a parlay and everyone picks one leg. Each leg is one unit: a win pays the odds, a loss is −1, a push or a skipped week is 0. Most units after week 17 wins the jersey.
       </p>
       {openWeek ? (
-        <p><Link to={`/bets/week/${openWeek}`} className="btn btn-primary">Add your week {openWeek} pick</Link></p>
+        <p><Link to={`/bets/week/${openWeek}`} className="btn btn-primary">{auth.admin ? `Enter week ${openWeek} picks` : `See week ${openWeek} picks`}</Link></p>
       ) : null}
 
       <Section title="Standings">

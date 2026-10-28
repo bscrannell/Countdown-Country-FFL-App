@@ -5,7 +5,7 @@ const ITEMS = [
   { to: "/power", title: "Power rankings", text: "All-play records, luck and lineup efficiency" },
   { to: "/history", title: "League history", text: "Champions and all-time records since 2020" },
   { to: "/rules", title: "Rules", text: "Parlay, playoff and draft rules" },
-  { to: "/admin", title: "Commissioner", text: "Grade picks and manage parlays" },
+  { to: "/admin", title: "Commissioner", text: "Enter and grade picks, manage parlays" },
 ];
 
 export default function More() {
